@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+torch
+torchaudio
+transformers
+numpy
+av==13.1.0
+openai
+python-multipart
+pytest
+httpx

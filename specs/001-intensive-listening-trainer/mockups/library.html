@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>线框图 · 材料库</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Segoe UI","Microsoft YaHei",sans-serif; background:#f3f4f6; color:#1f2937; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:#fff; border-bottom:1px solid #e5e7eb; }
+  .topbar h1 { font-size:18px; }
+  .topbar .entries button { margin-left:10px; padding:6px 14px; border:1px solid #d1d5db; border-radius:8px; background:#fff; cursor:pointer; }
+  .review-banner { margin:20px 28px 0; padding:14px 18px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; display:flex; align-items:center; justify-content:space-between; }
+  .review-banner b { color:#c2410c; }
+  .review-banner button { padding:8px 18px; background:#ea580c; color:#fff; border:none; border-radius:8px; cursor:pointer; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding:20px 28px; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+  .card h3 { font-size:15px; margin-bottom:6px; }
+  .stage { display:inline-block; font-size:12px; padding:2px 8px; border-radius:10px; margin-bottom:10px; }
+  .stage.learning { background:#dbeafe; color:#1d4ed8; }
+  .stage.reviewing { background:#fef3c7; color:#b45309; }
+  .stage.mastered { background:#d1fae5; color:#047857; }
+  .meta { font-size:12px; color:#6b7280; line-height:1.9; }
+  .meta b { color:#374151; font-weight:600; }
+  .score { font-size:13px; color:#047857; margin-top:6px; }
+  .add { border:2px dashed #d1d5db; display:flex; align-items:center; justify-content:center; min-height:150px; color:#9ca3af; cursor:pointer; font-size:14px; }
+  .card-actions { margin-top:10px; font-size:12px; color:#9ca3af; }
+  .card-actions span { margin-right:10px; cursor:pointer; }
+  .card-actions span:hover { color:#374151; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>精听工坊</h1>
+  <div class="entries">
+    <button>生词本</button>
+    <button>设置</button>
+  </div>
+</div>
+
+<div class="review-banner">
+  <div>📅 今日待复习 <b>12 条</b> · 预计 6 分钟</div>
+  <button>开始复习 →</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Real Easy English: Festive traditions</h3>
+    <span class="stage learning">学习中</span>
+    <div class="meta">时长 <b>6:24</b> ｜ 生词 <b>8</b> ｜ 没听懂 <b>3</b></div>
+    <div class="score">历史最好成绩 —</div>
+    <div class="card-actions"><span>继续学习</span><span>重命名</span><span>删除</span></div>
+  </div>
+  <div class="card">
+    <h3>6 Minute English: Sleep</h3>
+    <span class="stage reviewing">复习中</span>
+    <div class="meta">时长 <b>6:12</b> ｜ 生词 <b>14</b> ｜ 没听懂 <b>6</b></div>
+    <div class="score">历史最好成绩 75 分</div>
+    <div class="card-actions"><span>去泛听</span><span>开始检测</span><span>重命名</span><span>删除</span></div>
+  </div>
+  <div class="card">
+    <h3>The English We Speak: Fancy</h3>
+    <span class="stage mastered">已掌握</span>
+    <div class="meta">时长 <b>2:58</b> ｜ 生词 <b>5</b> ｜ 没听懂 <b>1</b></div>
+    <div class="score">历史最好成绩 92 分</div>
+    <div class="card-actions"><span>查看文稿</span><span>重测</span><span>重命名</span><span>删除</span></div>
+  </div>
+  <div class="add">＋ 新建导入</div>
+</div>
+</body>
+</html>

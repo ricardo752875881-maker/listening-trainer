@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>线框图 · 学习界面（v2）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Segoe UI","Microsoft YaHei",sans-serif; background:#fff; color:#1f2937; padding-bottom:90px; }
+  .topbar { display:flex; align-items:center; gap:14px; padding:12px 24px; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#fff; z-index:5; }
+  .topbar h2 { font-size:16px; }
+  .topbar .tag { font-size:12px; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:10px; }
+  .topbar button { margin-left:auto; padding:7px 14px; border-radius:8px; border:1px solid #d1d5db; background:#fff; cursor:pointer; }
+  .topbar button.primary { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+  .toolbar { display:flex; gap:14px; padding:8px 24px; font-size:13px; color:#6b7280; border-bottom:1px solid #f3f4f6; align-items:center; }
+  .toolbar label { cursor:pointer; user-select:none; }
+  .markmode { background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; padding:3px 10px; border-radius:8px; }
+  .markmode.on { background:#047857; color:#fff; }
+  .transcript { max-width:760px; margin:0 auto; padding:24px; }
+  .turn { margin-bottom:26px; }
+  .speaker { font-weight:700; font-size:16px; margin-bottom:6px; }
+  .speaker .playturn { font-weight:400; font-size:12px; color:#9ca3af; cursor:pointer; margin-left:8px; }
+  .en { font-size:17px; line-height:2.0; }
+  .zh { font-size:14.5px; line-height:1.7; color:#6b7280; margin-top:6px; }
+  .sentence { padding:1px 2px; border-radius:3px; cursor:pointer; position:relative; }
+  body.jump .sentence:hover { background:#f3f4f6; }
+  body.marking .sentence { cursor:text; }
+  .sentence.current { background:#fef9c3; }
+  .sentence.nu { border-bottom:2px dashed #dc2626; }
+  .nuicon { display:inline-block; margin-left:8px; font-size:14px; color:#d1d5db; cursor:pointer; vertical-align:middle; user-select:none; }
+  .nuicon.on { color:#dc2626; }
+  .sentence.unaligned { opacity:.55; }
+  .unaligned-badge { font-size:11px; color:#9ca3af; border:1px solid #d1d5db; border-radius:4px; padding:0 4px; margin-left:4px; }
+  .vocabmarked { background:#fef9c3; border-bottom:2px solid #f59e0b; padding:0 2px; border-radius:2px; } /* 荧光笔 */
+  .popover { position:fixed; background:#111827; color:#fff; padding:12px; border-radius:10px; font-size:13px; display:none; z-index:9; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+  .popover input { padding:6px 8px; border-radius:6px; border:none; margin-right:8px; font-size:13px; width:160px; }
+  .popover button { background:#f59e0b; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; }
+  .backbtn { position:fixed; right:24px; bottom:110px; background:#1d4ed8; color:#fff; border:none; padding:10px 16px; border-radius:999px; cursor:pointer; display:none; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+  .player { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e5e7eb; padding:10px 24px; display:flex; align-items:center; gap:14px; }
+  .player .pbtn { width:38px; height:38px; border-radius:50%; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-size:14px; }
+  .player .pbtn.main { background:#1d4ed8; color:#fff; border-color:#1d4ed8; width:44px; height:44px; }
+  .progress { flex:1; height:6px; background:#e5e7eb; border-radius:3px; position:relative; cursor:pointer; }
+  .progress i { position:absolute; left:0; top:0; bottom:0; background:#1d4ed8; border-radius:3px; width:23%; }
+  select { font-size:13px; padding:4px; }
+  .hint { font-size:12px; color:#9ca3af; }
+</style>
+</head>
+<body class="jump">
+<div class="topbar">
+  <h2>Real Easy English: Festive traditions</h2>
+  <span class="tag">学习中</span>
+  <button>🎙 跟读</button>
+  <button class="primary">进入复习 →</button>
+</div>
+<div class="toolbar">
+  <label><input type="checkbox" id="zhToggle" checked> 显示译文</label>
+  <label><input type="checkbox" id="wordHl"> 逐词高亮（卡拉OK）</label>
+  <button class="markmode" id="markBtn">✎ 标记模式</button>
+  <span class="hint" id="modeHint">当前：点击单词 = 从该词播放</span>
+</div>
+
+<div class="transcript" id="ts">
+  <div class="turn">
+    <div class="speaker">Georgie 乔治 <span class="playturn">▶ 从这话轮播放</span></div>
+    <p class="en" id="s1">Hello and welcome to Real Easy English. <span class="vocabmarked">In this podcast</span>, we talk about a different topic each week in easy English. I'm Georgie.</p>
+    <p class="zh">大家好，欢迎收听《真实简单英语》。在这档播客中，每周用简单的英语谈论一个不同的话题。我是乔治。</p>
+  </div>
+  <div class="turn">
+    <div class="speaker">Neil 尼尔 <span class="playturn">▶ 从这话轮播放</span></div>
+    <p class="en"><span class="sentence nu" id="s2">Hi, Georgie. Yes, I am feeling a little bit festive.<span class="nuicon on" title="没听懂（点击取消）">⚠</span></span> <span class="sentence" id="s3">That means I am feeling like Christmas is coming and I'm a bit excited.<span class="nuicon" title="标记没听懂">⚠</span></span></p>
+    <p class="zh">嗨，乔治。是的，我有点感受到节日气氛了。也就是说，我感觉圣诞节快到了，有点兴奋。</p>
+    <p class="en"><span class="sentence" id="s4">In the UK, we have lots of celebrations coming up. We have Christmas and New Year. Today we're going to talk about some of the family traditions we have at this time of year.<span class="nuicon" title="标记没听懂">⚠</span></span><span class="unaligned-badge">未对齐</span></p>
+    <p class="zh">在英国，我们有很多即将到来的庆祝活动。有圣诞节和新年。今天我们要聊聊每年这个时候的一些家庭传统。</p>
+  </div>
+  <div class="turn">
+    <div class="speaker">Georgie 乔治 <span class="playturn">▶ 从这话轮播放</span></div>
+    <p class="en"><span class="sentence" id="s5">Yes, and traditions — this means something we do every year and have done for a long time.<span class="nuicon" title="标记没听懂">⚠</span></span> <span class="sentence unaligned" id="s6">So, Neil, does your family have any traditions at Christmas?<span class="unaligned-badge">未对齐</span></span></p>
+    <p class="zh">是的，而传统，意思是我们每年都会做、并且已经做了很久的事情。那么尼尔，你家在圣诞节有什么传统吗？</p>
+  </div>
+</div>
+
+<div class="popover" id="pop">
+  添加到生词本：<input id="meaning" placeholder="释义（可留空），如： adj. 节日的">
+  <button onclick="saveVocab()">保存</button>
+</div>
+<button class="backbtn" id="backbtn">↓ 回到当前句</button>
+
+<div class="player">
+  <button class="pbtn" id="demo">▶</button>
+  <button class="pbtn main" id="playBtn">▶</button>
+  <button class="pbtn" onclick="replay()">↺</button>
+  <button class="pbtn" onclick="loopToggle(this)">🔁<br><small style="font-size:9px">单句</small></button>
+  <div class="progress" onclick="seek(event)"><i id="bar"></i></div>
+  <select><option>0.5×</option><option>0.75×</option><option selected>1.0×</option><option>1.25×</option><option>1.5×</option></select>
+  <span style="font-size:12px;color:#6b7280">01:28 / 06:24</span>
+</div>
+
+<script>
+const sents = ['s1','s2','s3','s4','s5','s6'].map(id=>document.getElementById(id));
+let idx=0, timer=null, pct=23;
+function stopDemo(){ clearInterval(timer); timer=null; document.getElementById('demo').textContent='▶'; document.getElementById('playBtn').textContent='▶'; }
+document.getElementById('demo').onclick=()=>{
+  if(timer){ stopDemo(); return; }
+  document.getElementById('demo').textContent='⏸'; document.getElementById('playBtn').textContent='⏸';
+  timer=setInterval(()=>{
+    sents.forEach(s=>s.classList.remove('current'));
+    sents[idx].classList.add('current');
+    sents[idx].scrollIntoView({block:'center',behavior:'smooth'});
+    pct=pct>=99?0:pct+1; document.getElementById('bar').style.width=pct+'%';
+    idx=(idx+1)%sents.length;
+  },1600);
+};
+document.getElementById('playBtn').onclick=()=>document.getElementById('demo').click();
+function replay(){ idx=Math.max(0,idx-1); }
+function loopToggle(b){ b.style.background=b.style.background?'':'#dbeafe'; }
+function seek(e){ const r=e.currentTarget.getBoundingClientRect(); pct=Math.round((e.clientX-r.left)/r.width*100); document.getElementById('bar').style.width=pct+'%'; }
+
+// 没听懂句尾图标：纯开关
+document.querySelectorAll('.nuicon').forEach(ic=>ic.onclick=e=>{
+  e.stopPropagation(); ic.classList.toggle('on'); ic.closest('.sentence').classList.toggle('nu');
+});
+
+// 标记模式开关
+const markBtn=document.getElementById('markBtn'), hint=document.getElementById('modeHint');
+markBtn.onclick=()=>{
+  const on=document.body.classList.toggle('marking');
+  document.body.classList.toggle('jump',!on);
+  markBtn.classList.toggle('on',on);
+  hint.textContent=on?'当前：划选词/短语添加生词（点击不再跳转）':'当前：点击单词 = 从该词播放';
+};
+// 标记模式下划词 → 释义输入
+document.getElementById('ts').addEventListener('mouseup',()=>{
+  if(!document.body.classList.contains('marking')){ document.getElementById('pop').style.display='none'; return; }
+  const sel=window.getSelection(); const t=sel.toString().trim();
+  const pop=document.getElementById('pop');
+  if(t && t.length<40){
+    const r=sel.getRangeAt(0).getBoundingClientRect();
+    pop.style.display='block'; pop.style.left=Math.max(10,r.left)+'px'; pop.style.top=(r.top-60)+'px';
+    window._selText=t;
+  } else pop.style.display='none';
+});
+function saveVocab(){
+  const m=document.getElementById('meaning').value;
+  alert(`已加入生词本：\n"${window._selText}"${m?'\n释义：'+m:'\n（未填释义）'}`);
+  document.getElementById('pop').style.display='none'; document.getElementById('meaning').value='';
+}
+// 非标记模式：点击句子 = 从句播放
+sents.forEach(s=>s.addEventListener('click',()=>{
+  if(document.body.classList.contains('marking')) return;
+  sents.forEach(x=>x.classList.remove('current')); s.classList.add('current');
+}));
+document.getElementById('zhToggle').onchange=e=>document.querySelectorAll('.zh').forEach(z=>z.style.display=e.target.checked?'':'none');
+let manual=false;
+window.addEventListener('wheel',()=>{ if(timer){ manual=true; document.getElementById('backbtn').style.display='block'; }},{passive:true});
+document.getElementById('backbtn').onclick=()=>{ manual=false; document.getElementById('backbtn').style.display='none'; sents[Math.max(0,idx-1)].scrollIntoView({block:'center',behavior:'smooth'}); };
+</script>
+</body>
+</html>
