@@ -60,16 +60,34 @@
           </template>
         </div>
         </template>
-        <!-- 隐藏原文：只显示当前播放句（聚焦模式） -->
+        <!-- 隐藏原文：只显示当前播放句（聚焦模式，交互与全文一致） -->
         <div v-else-if="focusMode" class="focus-box">
           <template v-if="currentRec">
             <p class="focus-en">
-              <span
-                v-for="(tok, ti) in currentRec.tokens"
-                :key="ti"
-                class="focus-word"
-                :class="{ karaoke: isKaraokeWord(currentRec, tok) }"
-              >{{ tok.text }}</span>
+              <template v-for="rec in focusRecs" :key="rec.sentence.id">
+                <span
+                  class="sentence"
+                  :data-sid="rec.sentence.id"
+                  :class="{ nu: rec.sentence.notUnderstood, unaligned: !rec.sentence.aligned }"
+                  @click="onSentenceClick(rec)"
+                >
+                  <span
+                    v-for="(tok, ti) in rec.tokens"
+                    :key="ti"
+                    class="word"
+                    :class="{ marked: tok.marked, karaoke: isKaraokeWord(rec, tok) }"
+                    @click.stop="onWordClick(rec, tok)"
+                  >{{ tok.text }}</span>{{ ' ' }}<span
+                    v-if="!rec.sentence.aligned"
+                    class="unaligned-badge"
+                  >未对齐</span><span
+                    class="nuicon"
+                    :class="{ on: rec.sentence.notUnderstood }"
+                    :title="rec.sentence.notUnderstood ? '没听懂（点击取消）' : '标记没听懂'"
+                    @click.stop="toggleNotUnderstood(rec)"
+                  >⚠</span>
+                </span>
+              </template>
             </p>
             <p v-if="focusTranslation" class="focus-zh">{{ focusTranslation }}</p>
             <p v-else class="focus-empty">（本句无译文）</p>
@@ -184,6 +202,7 @@ const showTranscript = ref(true)
 const focusMode = ref(false) // 隐藏原文时只显示当前播放句
 
 // 当前句所在块的译文（聚焦模式展示用）
+const focusRecs = computed(() => (currentRec.value ? [currentRec.value] : []))
 const focusTranslation = computed(() => {
   const rec = currentRec.value
   if (!rec) return ''
@@ -323,18 +342,24 @@ function buildModel(detail) {
   markingsBySentence = groupBy(markings, 'sentenceId')
 
   alignedSents = ss.filter((s) => s.aligned && s.startSec != null)
-  recById = new Map()
   const blocksByTurn = groupBy(bs, 'turnId')
   const sentsByBlock = groupBy(ss, 'blockId')
 
   turns.value = ts.map((t) => ({
     ...t,
-    blocks: (blocksByTurn.get(t.id) || []).map((b) => {
-      const sentences = (sentsByBlock.get(b.id) || []).map((s) => makeRec(s))
-      for (const r of sentences) recById.set(r.sentence.id, r)
-      return { ...b, sentences }
-    }),
+    blocks: (blocksByTurn.get(t.id) || []).map((b) => ({
+      ...b,
+      sentences: (sentsByBlock.get(b.id) || []).map((s) => makeRec(s)),
+    })),
   }))
+  // 从响应式树重建索引：后续对 rec.sentence / tokens 的变更（没听懂、荧光笔标记）
+  // 经由 Proxy 触发视图更新；直接持有原始对象会导致视图不刷新
+  recById = new Map()
+  for (const t of turns.value) {
+    for (const b of t.blocks) {
+      for (const r of b.sentences) recById.set(r.sentence.id, r)
+    }
+  }
   applyMarkings()
 }
 
@@ -919,13 +944,6 @@ onBeforeUnmount(() => {
   font-size: 24px;
   line-height: 1.9;
   font-weight: 500;
-}
-.focus-word + .focus-word::before {
-  content: ' ';
-}
-.focus-word.karaoke {
-  background: #bfdbfe;
-  border-radius: 4px;
 }
 .focus-zh {
   margin-top: 16px;
