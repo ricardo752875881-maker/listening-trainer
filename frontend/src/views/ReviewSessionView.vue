@@ -208,7 +208,6 @@ watch(current, (item) => {
           <span v-if="currentMat?.title" class="note" style="margin:0">来自《{{ currentMat.title }}》</span>
         </div>
         <div class="word">{{ current.text }}</div>
-        <p v-if="current.meaning" class="meaning-line">释义：{{ current.meaning }}</p>
 
         <div v-if="currentMat?.loading" class="muted">加载语境音频…</div>
         <p v-else-if="currentMat?.error" class="error-text small">{{ currentMat.error }}</p>
@@ -414,11 +413,6 @@ watch(current, (item) => {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 10px;
-}
-.meaning-line {
-  color: #047857;
-  font-size: 14px;
-  margin: 0 0 10px;
 }
 .ctx {
   background: #f9fafb;
