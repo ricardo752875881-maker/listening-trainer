@@ -17,6 +17,11 @@
     <p v-else-if="store.loading" class="hint">加载中…</p>
 
     <div v-if="!store.loading && sorted.length" class="grid">
+      <button class="card new-card" @click="go('/import')">
+        <span class="plus">＋</span>
+        <span>新建导入</span>
+      </button>
+
       <article v-for="m in sorted" :key="m.id" class="card">
         <div class="card-head">
           <template v-if="editingId === m.id">
@@ -64,11 +69,6 @@
         </div>
         <p v-if="editingId === m.id && renameError" class="error-text">{{ renameError }}</p>
       </article>
-
-      <button class="card new-card" @click="go('/import')">
-        <span class="plus">＋</span>
-        <span>新建导入</span>
-      </button>
     </div>
 
     <div v-else-if="!store.loading && !pageError" class="empty">
